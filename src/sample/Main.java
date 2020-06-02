@@ -35,9 +35,9 @@ public class Main extends Application {
         primaryStage.setTitle("Background Changer");
         Button chooseFiles = new Button("Choose Files");
         //ImageView current = new ImageView();
-        //Label newInfo = new Label();
+        Label newInfo = new Label();
         final FileChooser fileChooser = new FileChooser();
-        VBox layout = new VBox(chooseFiles);
+        VBox layout = new VBox(chooseFiles, newInfo);
         chooseFiles.setOnAction(e -> {
             List<File> list =fileChooser.showOpenMultipleDialog(primaryStage);
             if (list != null) {
@@ -53,6 +53,7 @@ public class Main extends Application {
                     }
                 }
             }
+            newInfo.setText("All done!");
         });
 
         Scene scene = new Scene(layout,360,360);
@@ -105,6 +106,7 @@ public class Main extends Application {
                 System.out.println(file + " now has a transparent background!");
 
             }
+
     }
 }
 
