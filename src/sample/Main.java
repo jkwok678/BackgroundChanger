@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
@@ -31,9 +32,10 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
 
-        primaryStage.setTitle("Hello World");
+        primaryStage.setTitle("Background Changer");
         Button chooseFiles = new Button("Choose Files");
-
+        //ImageView current = new ImageView();
+        //Label newInfo = new Label();
         final FileChooser fileChooser = new FileChooser();
         VBox layout = new VBox(chooseFiles);
         chooseFiles.setOnAction(e -> {
@@ -41,6 +43,10 @@ public class Main extends Application {
             if (list != null) {
                 for (File file : list) {
                     try {
+                        Image image = new Image(file.toURI().toString());
+                        //current.setImage(image);
+                        //newInfo.setText(" Now adding transparent background to " + file);
+                        Thread.sleep(1000);
                         process(file);
                     } catch (IOException | InterruptedException ex) {
                         ex.printStackTrace();
@@ -49,7 +55,7 @@ public class Main extends Application {
             }
         });
 
-        Scene scene = new Scene(layout);
+        Scene scene = new Scene(layout,360,360);
 
 
         primaryStage.setScene(scene);
@@ -73,7 +79,7 @@ public class Main extends Application {
         if (file.getAbsolutePath().endsWith(".png")) {
                 String fileURI = file.toURI().toString();
                 Image image = new Image(fileURI);
-                Thread.sleep(500);
+
                 double height = image.getHeight();
                 double width = image.getWidth();
 
