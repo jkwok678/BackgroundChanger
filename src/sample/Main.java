@@ -1,16 +1,14 @@
 package sample;
 
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
@@ -32,33 +30,55 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
 
+
         primaryStage.setTitle("Background Changer");
         Button chooseFiles = new Button("Choose Files");
         //ImageView current = new ImageView();
         Label newInfo = new Label();
+        ProgressBar progressBar = new ProgressBar();
         final FileChooser fileChooser = new FileChooser();
-        VBox layout = new VBox(chooseFiles, newInfo);
+        VBox layout = new VBox(chooseFiles, newInfo,progressBar);
+
         chooseFiles.setOnAction(e -> {
+            //Place all chosen files in list
             List<File> list =fileChooser.showOpenMultipleDialog(primaryStage);
-            if (list != null) {
-                for (File file : list) {
-                    try {
-                        Image image = new Image(file.toURI().toString());
-                        //current.setImage(image);
-                        //newInfo.setText(" Now adding transparent background to " + file);
-                        Thread.sleep(1000);
-                        process(file);
-                    } catch (IOException | InterruptedException ex) {
-                        ex.printStackTrace();
+            //Make a new task that another thread will work on.
+            Task task = new Task<Void>() {
+                @Override public Void call() {
+                    //counter and the total images that needs to be processed.
+                    int count = 0;
+                    int end = list.size();
+                    //Go through each file
+                    if (list != null) {
+                        for (File file : list) {
+                            try {
+                                Image image = new Image(file.toURI().toString());
+                                //current.setImage(image);
+                                //newInfo.setText(" Now adding transparent background to " + file);
+                                Thread.sleep(500);
+                                process(file);
+                                count++;
+                                //Update the Progress bar
+                                updateProgress(count, end);
+                            } catch (IOException | InterruptedException ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+
                     }
+
+                    return null ;
                 }
-            }
-            newInfo.setText("All done!");
+
+            };
+            //Connect the progressBar to the task.
+            progressBar.progressProperty().bind(task.progressProperty());
+            new Thread(task).start();
+
+
         });
 
         Scene scene = new Scene(layout,360,360);
-
-
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -87,10 +107,10 @@ public class Main extends Application {
                 WritableImage newImage = new WritableImage((int) width, (int) height);
                 PixelWriter pixelWriter = newImage.getPixelWriter();
 
-
                 for (int y = 0; y < height; y++) {
                     for (int x = 0; x < width; x++) {
                         Color currentColor = image.getPixelReader().getColor(x, y);
+                        //if the colour equals white#, make it transparent, otherwise just leave it.
                         if (currentColor.equals(Color.WHITE)) {
                             pixelWriter.setColor(x, y, Color.color(0, 0, 0, 0.0));
                             System.out.println("Background removing!");
@@ -102,6 +122,7 @@ public class Main extends Application {
 
                     }
                 }
+                //Write file to the folder with same name and format
                 ImageIO.write(SwingFXUtils.fromFXImage(newImage, null), "png", file);
                 System.out.println(file + " now has a transparent background!");
 
