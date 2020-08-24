@@ -37,7 +37,11 @@ public class Main extends Application {
         Label newInfo = new Label();
         ProgressBar progressBar = new ProgressBar();
         final FileChooser fileChooser = new FileChooser();
-        VBox layout = new VBox(chooseFiles, newInfo,progressBar);
+        Label oldColourLabel = new Label("Old colour: ");
+        ColorPicker oldColour = new ColorPicker();
+        Label newColourLabel = new Label("New colour: ");
+        ColorPicker newColour = new ColorPicker();
+        VBox layout = new VBox(chooseFiles, oldColourLabel, oldColour, newColourLabel, newColour, newInfo,progressBar);
 
         chooseFiles.setOnAction(e -> {
             //Place all chosen files in list
@@ -56,7 +60,7 @@ public class Main extends Application {
                                 //current.setImage(image);
                                 //newInfo.setText(" Now adding transparent background to " + file);
                                 Thread.sleep(500);
-                                process(file);
+                                process(file, oldColour.getValue(), newColour.getValue());
                                 count++;
                                 //Update the Progress bar
                                 updateProgress(count, end);
@@ -95,7 +99,7 @@ public class Main extends Application {
      * @throws IOException
      * @throws InterruptedException
      */
-    public void process(File file) throws IOException, InterruptedException {
+    public void process(File file,Color oldColour , Color newColour) throws IOException, InterruptedException {
 
         if (file.getAbsolutePath().endsWith(".png")) {
                 String fileURI = file.toURI().toString();
@@ -111,8 +115,8 @@ public class Main extends Application {
                     for (int x = 0; x < width; x++) {
                         Color currentColor = image.getPixelReader().getColor(x, y);
                         //if the colour equals white#, make it transparent, otherwise just leave it.
-                        if (currentColor.equals(Color.WHITE)) {
-                            pixelWriter.setColor(x, y, Color.color(0, 0, 0, 0.0));
+                        if (currentColor.equals(oldColour)) {
+                            pixelWriter.setColor(x, y, newColour);
                             System.out.println("Background removing!");
                         } else {
                             pixelWriter.setColor(x, y, currentColor);
